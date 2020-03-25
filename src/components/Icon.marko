@@ -1,14 +1,27 @@
 class {
-    handleDragover(e) {
-        e.preventDefault()
-    }
     handleDrop(e) {
         e.preventDefault()
-        console.log('droppo')
+        for (var i = 0; i < e.dataTransfer.items.length; i++) {
+            console.log(e.dataTransfer.items[i])
+            if (e.dataTransfer.items[i].kind ==='file') {
+                // Handle dropped file
+            } else {
+                // Handle dropped Icon
+            }
+        }
+    }
+    handleDragstart(e) {
+        e.dataTransfer.setData('image/png', this.input.image)
+        e.dataTransfer.effectAllowed = 'copy'
+        e.dataTransfer.setDragImage(this.input.image, 0, 0)
+    }
+    handleDragover(e) {
+        e.preventDefault()
     }
 }
 style {
     .Icon {
+        position: relative;
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -20,7 +33,7 @@ style {
         font-weight: bold;
     }
 }
-div.Icon on-dragover('handleDragover') on-drop('handleDrop')
+div.Icon draggable="true" on-dragover('handleDragover') on-drop('handleDrop') on-dragstart('handleDragstart')
     $ let [w, h] = input.name.split('x')
-    img.Icon__Image width=w height=h src=input.image
-    span.Icon__Name -- ${input.name}
+    img.Icon__Image draggable=false width=w height=h src=input.image
+    span.Icon__Name draggable=false -- ${input.name}
