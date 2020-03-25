@@ -1,3 +1,26 @@
-div.Icon
-    image
-    span -- ${input.name}
+class {
+    handleDragover(e) {
+        e.preventDefault()
+    }
+    handleDrop(e) {
+        e.preventDefault()
+        console.log('droppo')
+    }
+}
+style {
+    .Icon {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .Icon__Image {
+        border: 1px solid white;
+    }
+    .Icon__Name {
+        font-weight: bold;
+    }
+}
+div.Icon on-dragover('handleDragover') on-drop('handleDrop')
+    $ let [w, h] = input.name.split('x')
+    img.Icon__Image width=w height=h src=input.image
+    span.Icon__Name -- ${input.name}

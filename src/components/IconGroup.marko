@@ -1,13 +1,39 @@
+class {
+    onCreate() {
+        this.state = {
+            folded: false
+        }
+    }
+    handleFold(e) {
+        this.state.folded = !this.state.folded
+    }
+}
 
 style {
+    .IconGroup {
+        display: flex;
+        flex-direction: column;
+    }
     .IconGroup__Title {
         font-weight: bold;
+    }
+    .IconGroup__Icons {
+        display: grid;
+        grid-auto-flow: column;
+        grid-gap: 1em;
+        align-items: center;
+        transition: all .5s;
+    }
+    .IconGroup__Icons.-folded {
+        height: 0;
+        overflow: hidden;
     }
 }
 
 div.IconGroup
-    div.IconGroup__Title -- ${input.name}
-    div.IconGroup__Icons
-    for|icon| of=input.group.icons
-        $ console.log(input.icons)
-        $ // Icon name=icon icon=input.icons.find(v=>v===icon)
+    label.IconGroup__Title 
+        input type='checkbox' on-change('handleFold') checked=!state.folded
+        span -- ${input.name}
+    div.IconGroup__Icons class={'-folded': state.folded}
+        for|icon| of=input.group.icons
+            Icon name=icon image=input.icons[icon].image
