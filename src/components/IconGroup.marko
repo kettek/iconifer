@@ -1,11 +1,18 @@
 class {
     onCreate() {
         this.state = {
-            folded: false
+            folded: false,
+            update: 0
         }
+    }
+    onInput() {
+        if (this.state) this.state.update++
     }
     handleFold(e) {
         this.state.folded = !this.state.folded
+    }
+    handleLoadImage(name, data) {
+        this.emit('loadimage', name, data)
     }
 }
 
@@ -38,4 +45,4 @@ div.IconGroup
         span -- ${input.name}
     div.IconGroup__Icons class={'-folded': state.folded}
         for|icon| of=input.group.icons
-            Icon name=icon image=input.icons[icon].image
+            Icon name=icon image=input.icons[icon].image on-loadimage('handleLoadImage')

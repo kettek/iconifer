@@ -1,10 +1,15 @@
 class {
     handleDrop(e) {
         e.preventDefault()
-        for (var i = 0; i < e.dataTransfer.items.length; i++) {
-            console.log(e.dataTransfer.items[i])
+        for (let i = 0; i < e.dataTransfer.items.length; i++) {
             if (e.dataTransfer.items[i].kind ==='file') {
                 // Handle dropped file
+                let file = e.dataTransfer.items[i].getAsFile();
+                let reader = new FileReader()
+                reader.addEventListener('load', e => {
+                    this.emit('loadimage', this.input.name, reader.result)
+                })
+                reader.readAsDataURL(file)
             } else {
                 // Handle dropped Icon
             }
@@ -17,6 +22,9 @@ class {
     }
     handleDragover(e) {
         e.preventDefault()
+    }
+    onInput(inp) {
+        this.forceUpdate()
     }
 }
 style {
