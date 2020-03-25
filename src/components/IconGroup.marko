@@ -1,0 +1,13 @@
+
+style {
+    .IconGroup__Title {
+        font-weight: bold;
+    }
+}
+
+div.IconGroup
+    div.IconGroup__Title -- ${input.name}
+    div.IconGroup__Icons
+    for|icon| of=input.group.icons
+        $ console.log(input.icons)
+        $ // Icon name=icon icon=input.icons.find(v=>v===icon)
