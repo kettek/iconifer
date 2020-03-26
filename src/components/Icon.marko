@@ -37,7 +37,7 @@ class {
     handleDragstart(e) {
         e.dataTransfer.effectAllowed = 'copy'
         e.dataTransfer.setDragImage(this.getEl('image'), 0, 0)
-        e.dataTransfer.setData('dataURL', this.input.image)
+        e.dataTransfer.setData('dataURL', this.input.originalImage)
     }
     handleDragover(e) {
         e.preventDefault()
