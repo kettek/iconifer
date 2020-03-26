@@ -1,15 +1,32 @@
 class {
+    readFile(file) {
+        const reader = new FileReader()
+        reader.addEventListener('load', e => {
+            this.emit('loadimage', this.input.name, reader.result)
+        })
+        reader.readAsDataURL(file)
+    }
+    handleClick(e) {
+        const inp = document.createElement('input')
+        inp.type = 'file'
+        inp.accept = 'image/*'
+        inp.addEventListener('input', e => {
+            for (let i = 0; i < e.target.files.length; i++) {
+                this.readFile(e.target.files[i])
+            }
+        })
+        inp.click()
+    }
+    handleRightClick(e) {
+        e.preventDefault()
+        this.emit('clearimage', this.input.name)
+    }
     handleDrop(e) {
         e.preventDefault()
         for (let i = 0; i < e.dataTransfer.items.length; i++) {
             if (e.dataTransfer.items[i].kind ==='file') {
                 // Handle dropped file
-                let file = e.dataTransfer.items[i].getAsFile();
-                let reader = new FileReader()
-                reader.addEventListener('load', e => {
-                    this.emit('loadimage', this.input.name, reader.result)
-                })
-                reader.readAsDataURL(file)
+                this.readFile(e.dataTransfer.items[i].getAsFile())
             } else {
                 // Handle dropped Icon
             }
@@ -49,7 +66,7 @@ style {
         font-weight: bold;
     }
 }
-div.Icon draggable="true" on-dragover('handleDragover') on-drop('handleDrop') on-dragstart('handleDragstart')
+div.Icon draggable="true" on-dragover('handleDragover') on-drop('handleDrop') on-dragstart('handleDragstart') on-click('handleClick') on-contextmenu('handleRightClick')
     $ let [w, h] = input.name.split('x')
     img.Icon__Image draggable=false width=w height=h src=input.image
     span.Icon__Name draggable=false -- ${input.name}
