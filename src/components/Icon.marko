@@ -23,20 +23,21 @@ class {
     }
     handleDrop(e) {
         e.preventDefault()
-        for (let i = 0; i < e.dataTransfer.items.length; i++) {
-            if (e.dataTransfer.items[i].kind === 'file' && e.dataTransfer.items[i].type.match(/^image\//)) {
-                // Handle dropped file
-                this.readFile(e.dataTransfer.items[i].getAsFile())
-            } else {
-                console.log(e.dataTransfer.items[i])
-                // Handle dropped Icon
+        const dataURL = e.dataTransfer.getData('dataURL')
+        if (dataURL) {
+            this.emit('loadimage', this.input.name, dataURL)
+        } else {
+            for (let i = 0; i < e.dataTransfer.items.length; i++) {
+                if (e.dataTransfer.items[i].kind === 'file' && e.dataTransfer.items[i].type.match(/^image\//)) {
+                    this.readFile(e.dataTransfer.items[i].getAsFile())
+                }
             }
         }
     }
     handleDragstart(e) {
-        e.dataTransfer.setData('image/png', this.input.image)
         e.dataTransfer.effectAllowed = 'copy'
-        e.dataTransfer.setDragImage(this.input.image, 0, 0)
+        e.dataTransfer.setDragImage(this.getEl('image'), 0, 0)
+        e.dataTransfer.setData('dataURL', this.input.image)
     }
     handleDragover(e) {
         e.preventDefault()
@@ -69,5 +70,5 @@ style {
 }
 div.Icon draggable="true" on-dragover('handleDragover') on-drop('handleDrop') on-dragstart('handleDragstart') on-click('handleClick') on-contextmenu('handleRightClick')
     $ let [w, h] = input.name.split('x')
-    img.Icon__Image draggable=false width=w height=h src=input.image
+    img.Icon__Image key='image' draggable=false width=w height=h src=input.image
     span.Icon__Name draggable=false -- ${input.name}
