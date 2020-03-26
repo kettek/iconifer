@@ -185,8 +185,12 @@ style {
         cursor: pointer;
         transition: .3s all;
     }
+    .Set__Item input {
+        display: none;
+    }
     .Set__Item.-active {
         background: var(--primary);
+        text-decoration: underline;
     }
     .Icons {
         display: grid;
@@ -197,13 +201,14 @@ style {
         transition: all .5s;
         overflow: auto;
         background: var(--primary);
+        padding: 1em;
     }
 }
 
 div.Menu
 div.Content
     div.SetTabs
-        for|set| of=Object.entries(state.sets).sort()
+        for|set| of=Object.entries(state.sets)
             div.SetTabs__Tab class={'-active': state.activeSet===set[0]} on-click('activateSet', set[0]) -- ${set[0]}
     div.Set
         for|groupName, group| in=state.sets[state.activeSet]
