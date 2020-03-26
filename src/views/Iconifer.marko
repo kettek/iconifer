@@ -76,7 +76,6 @@ class {
         this.ctx = this.canvas.getContext('2d')
     }
     updateImage(img, target, force=false) {
-        console.log('making', target)
         if (!this.state.images[target]) {
            this.state.images[target] = {
                image: '',
@@ -84,7 +83,6 @@ class {
            }
         }
         if (this.state.images[target].image === '' || force===true) {
-            console.log('making it....')
             let [w, h] = target.split('x')
             this.canvas.width = w
             this.canvas.height = h
@@ -190,7 +188,6 @@ style {
     }
     .Set__Item.-active {
         background: var(--primary);
-        text-decoration: underline;
     }
     .Icons {
         display: grid;
