@@ -24,10 +24,11 @@ class {
     handleDrop(e) {
         e.preventDefault()
         for (let i = 0; i < e.dataTransfer.items.length; i++) {
-            if (e.dataTransfer.items[i].kind ==='file') {
+            if (e.dataTransfer.items[i].kind === 'file' && e.dataTransfer.items[i].type.match(/^image\//)) {
                 // Handle dropped file
                 this.readFile(e.dataTransfer.items[i].getAsFile())
             } else {
+                console.log(e.dataTransfer.items[i])
                 // Handle dropped Icon
             }
         }
