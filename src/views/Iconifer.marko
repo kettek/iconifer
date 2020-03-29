@@ -5,7 +5,17 @@ class {
             activeSet: 'X11',
             activeExport: 'ico',
             exports: {
-                'icns': {},
+                'icns': {
+                    /*
+                        1024 = ic10 (10.7)
+                        512  = ic09 (10.5)
+                        256  = ic08 (10.5)
+                        128  = ic07 (10.7)
+                        64   = icp6 (10.7)
+                        32   = icp5 (10.7)
+                        16   = icp4 (10.7)
+                    */
+                },
                 'ico': {},
                 'png': {},
             },
@@ -119,21 +129,30 @@ class {
             this.updateImages(icons, img, name, data)
         })
         img.src = data
-   }
-   handleClearImage(target) {
-       this.createImage(target)
-       this.forceUpdate()
-   }
-   activateSet(which) {
-       this.state.activeSet = which
-   }
-   toggleSetGroup(setName, groupName) {
-       this.state.sets[setName][groupName].active = !this.state.sets[setName][groupName].active
-       this.forceUpdate()
-   }
-   activateExport(which) {
-       this.state.activeExport = which
-   }
+    }
+    handleClearImage(target) {
+        this.createImage(target)
+        this.forceUpdate()
+    }
+    activateSet(which) {
+        this.state.activeSet = which
+    }
+    toggleSetGroup(setName, groupName) {
+        this.state.sets[setName][groupName].active = !this.state.sets[setName][groupName].active
+        this.forceUpdate()
+    }
+    activateExport(which) {
+        this.state.activeExport = which
+    }
+    exportICO() {
+        // Build all from 256 and down.
+    }
+    exportPNGs() {
+        // Export to the desired directory, formatting the files according to some sort of string-matching input.
+    }
+    exportICNS() {
+
+    }
 }
 
 style {
