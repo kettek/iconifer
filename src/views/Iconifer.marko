@@ -3,6 +3,12 @@ class {
         this.state = {
             images: {},
             activeSet: 'X11',
+            activeExport: 'ico',
+            exports: {
+                'icns': {},
+                'ico': {},
+                'png': {},
+            },
             sets: {
                 'Mac OS': {
                     'Application': {
@@ -125,6 +131,9 @@ class {
        this.state.sets[setName][groupName].active = !this.state.sets[setName][groupName].active
        this.forceUpdate()
    }
+   activateExport(which) {
+       this.state.activeExport = which
+   }
 }
 
 style {
@@ -132,6 +141,7 @@ style {
         --primary: #51789d;
         --secondary: #0c1a13;
         --tertiary: #667e94;
+        --quaternary: #f3e5ec;
     }
     * {
         box-sizing: border-box;
@@ -208,6 +218,43 @@ style {
         background: var(--primary);
         padding: 1em;
     }
+    .Exports {
+        display: grid;
+        grid-template-rows: 1fr;
+        grid-template-columns: auto auto minmax(0, 1fr);
+        justify-content: flex-start;
+        font-size: 100%;
+        font-family: sans-serif;
+    }
+    .Exports__Title {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--quaternary);
+        padding: .5em;
+        font-size: 125%;
+        text-align: center;
+    }
+    .Exports__Entries {
+        display: grid;
+        background: var(--quaternary);
+    }
+    .Exports__Entries__Item {
+        background: var(--primary);
+        display: inline-block;
+        padding: .25em;
+        user-select: none;
+        cursor: pointer;
+        transition: .3s all;
+    }
+    .Exports__Entries__Item.-active {
+        background: var(--quaternary);
+    }
+    .Exports__Info {
+        background: var(--quaternary);
+        padding: .5em;
+    }
+
 }
 
 div.Menu
@@ -235,3 +282,11 @@ div.Content
         })
         for|icon| of=icons
             Icon name=icon originalImage=state.images[icon]?state.images[icon].originalImage:'' image=state.images[icon]?state.images[icon].image:'' on-loadimage('handleLoadImage', icons) on-clearimage('handleClearImage')
+    div.Exports
+        div.Exports__Title 
+            span -- Export to
+        div.Exports__Entries
+            for|exp| of=Object.entries(state.exports)
+                label.Exports__Entries__Item class={'-active': state.activeExport===exp[0]} on-click('activateExport', exp[0])
+                    span -- ${exp[0]}
+        div.Exports__Info -- output for ${state.activeExport}
