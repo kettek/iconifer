@@ -1,3 +1,5 @@
+import { encode as IcoEncode } from 'ico-endec'
+
 class {
     onCreate() {
         this.state = {
@@ -144,14 +146,38 @@ class {
     activateExport(which) {
         this.state.activeExport = which
     }
+    export() {
+      switch(this.state.activeExport) {
+        case 'ico':
+          this.exportICO()
+        break;
+      }
+    }
     exportICO() {
-        // Build all from 256 and down.
+      let icons = [...Object.entries(this.state.sets[this.state.activeSet]).reduce((o,v)=>{
+        if (!v[1].active) return o
+        return new Set([...o, ...v[1].icons])
+      }, new Set())].sort((a, b)=>{
+        let [aW, aH] = a.split('x')
+        aW = Number(aW), aH = Number(aH)
+        let [bW, bH] = b.split('x')
+        bW = Number(bW), bH = Number(bH)
+        if (aW+aH > bW+bH) return -1
+        if (aW+aH < bW+bH) return 1
+        return 0
+      }).filter(icon => {
+        let [w, h] = icon.split('x')
+        w = Number(w), h = Number(h)
+        if (w <= 256 && h <= 256) return true
+      }).reverse().map(icon => {
+        // TODO: Use canvas toBlob().arrayBuffer() results
+        return icon
+      })
     }
     exportPNGs() {
         // Export to the desired directory, formatting the files according to some sort of string-matching input.
     }
     exportICNS() {
-
     }
 }
 
@@ -309,3 +335,4 @@ div.Content
                 label.Exports__Entries__Item class={'-active': state.activeExport===exp[0]} on-click('activateExport', exp[0])
                     span -- ${exp[0]}
         div.Exports__Info -- output for ${state.activeExport}
+          button on-click('export') -- export
