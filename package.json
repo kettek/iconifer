@@ -40,6 +40,6 @@
         }
     },
     "dependencies": {
-        "ico-endec": "git+https://github.com/kettek/ico-endec-js.git"
+        "ico-endec": "^0.1.4"
     }
 }
