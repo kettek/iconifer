@@ -38,6 +38,7 @@
         }
     },
     "dependencies": {
+        "icns-endec": "0.0.3",
         "ico-endec": "^0.1.4"
     }
 }

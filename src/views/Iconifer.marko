@@ -1,6 +1,7 @@
 import { remote } from 'electron'
 import * as fs from 'fs'
 import { encode as IcoEncode } from 'ico-endec'
+import { encode as IcnsEncode } from 'icns-endec'
 
 class {
     onCreate() {
@@ -156,10 +157,12 @@ class {
       switch(this.state.activeExport) {
         case 'ico':
           this.exportICO()
+        case 'icns':
+          this.exportICNS()
         break;
       }
     }
-    async exportICO() {
+    getExportingIcons() {
       let icons = [...Object.entries(this.state.sets[this.state.activeSet]).reduce((o,v)=>{
         if (!v[1].active) return o
         return new Set([...o, ...v[1].icons])
@@ -171,7 +174,11 @@ class {
         if (aW+aH > bW+bH) return -1
         if (aW+aH < bW+bH) return 1
         return 0
-      }).filter(icon => {
+      })
+      return icons
+    }
+    async exportICO() {
+      let icons = this.getExportingIcons().filter(icon => {
         let [w, h] = icon.split('x')
         w = Number(w), h = Number(h)
         if (w <= 256 && h <= 256) return true
@@ -190,10 +197,40 @@ class {
       let outputBuffer = IcoEncode(icons)
       await fs.promises.writeFile(r.filePath, outputBuffer, null)
     }
-    exportPNGs() {
-        // Export to the desired directory, formatting the files according to some sort of string-matching input.
+    async exportICNS() {
+      // TODO: We somehow update the UI before all of this to show whether or not the icon is being exported. Additionally, it would be nice to provide support the 2x retina ic11-ic14 icons.
+      let supportedSizes = [ '16x16', '32x32', '64x64', '128x128', '256x256', '512x512', '1024x1024' ]
+      let sizeMapping = {
+        '16x16':     'icp4',
+        '32x32':     'icp5',
+        '64x64':     'icp6',
+        '128x128':   'ic07',
+        '256x256':   'ic08',
+        '512x512':   'ic09',
+        '1024x1024': 'ic10',
+      }
+      let icons = this.getExportingIcons().filter(icon => {
+        if (supportedSizes.includes(icon)) return true
+      }).reverse()
+
+      for (let i = 0; i < icons.length; i++) {
+        icons[i] = {
+            OSType: sizeMapping[icons[i]],
+            buffer: await this.state.images[icons[i]].blob.arrayBuffer(),
+        }
+      }
+
+      let r = await remote.dialog.showSaveDialog({
+        filters: [{name: 'ICNS', extensions: ['icns']}],
+        title: 'Export to ICNS file',
+      })
+      if (r.canceled) return
+
+      let outputBuffer = IcnsEncode(icons)
+      await fs.promises.writeFile(r.filePath, outputBuffer, null)
     }
-    exportICNS() {
+    exportPNGs() {
+      // Export to the desired directory, formatting the files according to some sort of string-matching input.
     }
 }
 
