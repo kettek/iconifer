@@ -176,12 +176,16 @@ class {
     activateExport(which) {
         this.state.activeExport = which
     }
-    export() {
+    exportIcon() {
       switch(this.state.activeExport) {
         case 'ico':
           this.exportICO()
+        break;
         case 'icns':
           this.exportICNS()
+        break;
+        case 'png':
+          this.exportPNGs()
         break;
       }
     }
@@ -212,6 +216,7 @@ class {
     }
     async exportICO() {
       let icons = this.getExportingIcons().filter(icon => {
+        if (this.state.inactiveICOs[icon]) return false
         let [w, h] = icon.split('x')
         w = Number(w), h = Number(h)
         if (w <= 256 && h <= 256) return true
@@ -233,6 +238,7 @@ class {
     async exportICNS() {
       // TODO: We somehow update the UI before all of this to show whether or not the icon is being exported. Additionally, it would be nice to provide support the 2x retina ic11-ic14 icons.
       let icons = this.getExportingIcons().filter(icon => {
+        if (this.state.inactiveICNS[this.sizeToICNMap[icon]]) return false
         if (this.supportedICNS.includes(this.sizeToICNMap[icon])) return true
       }).reverse()
 
@@ -415,7 +421,7 @@ div.Content
               $ let disabled = state.images[component.ICNToSizeMap[icn]] ? state.images[component.ICNToSizeMap[icn]].image === '' : true
               label
                 input type='checkbox' checked=disabled?false:!state.inactiveICNS[icn] disabled=disabled on-change('setInactiveICNS', icn)
-                span -- ${icn}(${component.ICNToSizeMap[icn]})
+                span -- ${component.ICNToSizeMap[icn]}(${icn})
           else-if(state.activeExport === 'ico')
             for|icon| of=icons.filter(icon => {
               let [w, h] = icon.split('x')
@@ -428,4 +434,4 @@ div.Content
                 span -- ${icon}
           else-if(state.activeExport === 'png')
             span -- png opts
-          button on-click('export') -- export
+          button on-click('exportIcon') -- export
