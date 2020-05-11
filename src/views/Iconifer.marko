@@ -10,6 +10,7 @@ class {
             activeSet: 'X11',
             activeExport: 'ico',
             inactiveICNS: {},
+            inactiveICOs: {},
             exports: {
                 'icns': {
                     /*
@@ -95,7 +96,7 @@ class {
             },
         }
         // FIXME: icp4 through icp6 generate corrupted icons -- do these actually not support PNG...?
-        this.supportedICNS = ['ic07', 'ic08', 'ic09', 'ic10']
+        this.supportedICNS = ['ic10', 'ic09', 'ic08', 'ic07']
         this.sizeToICNMap = {
           '16x16':     'icp4',
           '32x32':     'icp5',
@@ -186,6 +187,11 @@ class {
     }
     setInactiveICNS(which, e) {
       this.state.inactiveICNS[which] = !e.target.checked
+      this.forceUpdate()
+      this.update()
+    }
+    setInactiveICO(which, e) {
+      this.state.inactiveICOs[which] = !e.target.checked
       this.forceUpdate()
       this.update()
     }
@@ -411,7 +417,15 @@ div.Content
                 input type='checkbox' checked=disabled?false:!state.inactiveICNS[icn] disabled=disabled on-change('setInactiveICNS', icn)
                 span -- ${icn}(${component.ICNToSizeMap[icn]})
           else-if(state.activeExport === 'ico')
-            span -- ico opts
+            for|icon| of=icons.filter(icon => {
+              let [w, h] = icon.split('x')
+              w = Number(w), h = Number(h)
+              if (w <= 256 && h <= 256) return true
+            })
+              $ let disabled = state.images[icon] ? state.images[icon].image === '' : true
+              label
+                input type='checkbox' checked=disabled?false:!state.inactiveICOs[icon] disabled=disabled on-change('setInactiveICO', icon)
+                span -- ${icon}
           else-if(state.activeExport === 'png')
             span -- png opts
           button on-click('export') -- export
