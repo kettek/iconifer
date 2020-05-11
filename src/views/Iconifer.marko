@@ -9,6 +9,7 @@ class {
             images: {},
             activeSet: 'X11',
             activeExport: 'ico',
+            inactiveICNS: {},
             exports: {
                 'icns': {
                     /*
@@ -93,6 +94,27 @@ class {
                 }
             },
         }
+        // FIXME: icp4 through icp6 generate corrupted icons -- do these actually not support PNG...?
+        this.supportedICNS = ['ic07', 'ic08', 'ic09', 'ic10']
+        this.sizeToICNMap = {
+          '16x16':     'icp4',
+          '32x32':     'icp5',
+          '64x64':     'icp6',
+          '128x128':   'ic07',
+          '256x256':   'ic08',
+          '512x512':   'ic09',
+          '1024x1024': 'ic10',
+        }
+        this.ICNToSizeMap = {
+          'icp4': '16x16',
+          'icp5': '32x32',
+          'icp6': '64x64',
+          'ic07': '128x128',
+          'ic08': '256x256',
+          'ic09': '512x512',
+          'ic10': '1024x1024',
+        }
+
         this.canvas = document.createElement('canvas')
         this.ctx = this.canvas.getContext('2d')
     }
@@ -162,6 +184,11 @@ class {
         break;
       }
     }
+    setInactiveICNS(which, e) {
+      this.state.inactiveICNS[which] = !e.target.checked
+      this.forceUpdate()
+      this.update()
+    }
     getExportingIcons() {
       let icons = [...Object.entries(this.state.sets[this.state.activeSet]).reduce((o,v)=>{
         if (!v[1].active) return o
@@ -199,24 +226,13 @@ class {
     }
     async exportICNS() {
       // TODO: We somehow update the UI before all of this to show whether or not the icon is being exported. Additionally, it would be nice to provide support the 2x retina ic11-ic14 icons.
-      // FIXME: icp4 through icp6 generate corrupted icons -- do these actually not support PNG...?
-      let supportedSizes = [ '128x128', '256x256', '512x512', '1024x1024' ]
-      let sizeMapping = {
-        '16x16':     'icp4',
-        '32x32':     'icp5',
-        '64x64':     'icp6',
-        '128x128':   'ic07',
-        '256x256':   'ic08',
-        '512x512':   'ic09',
-        '1024x1024': 'ic10',
-      }
       let icons = this.getExportingIcons().filter(icon => {
-        if (supportedSizes.includes(icon)) return true
+        if (this.supportedICNS.includes(this.sizeToICNMap[icon])) return true
       }).reverse()
 
       for (let i = 0; i < icons.length; i++) {
         icons[i] = {
-            OSType: sizeMapping[icons[i]],
+            OSType: this.sizeToICNMap[icons[i]],
             buffer: await this.state.images[icons[i]].blob.arrayBuffer(),
         }
       }
@@ -353,7 +369,6 @@ style {
         background: var(--quaternary);
         padding: .5em;
     }
-
 }
 
 div.Menu
@@ -388,5 +403,15 @@ div.Content
             for|exp| of=Object.entries(state.exports)
                 label.Exports__Entries__Item class={'-active': state.activeExport===exp[0]} on-click('activateExport', exp[0])
                     span -- ${exp[0]}
-        div.Exports__Info -- output for ${state.activeExport}
+        div.Exports__Info
+          if(state.activeExport === 'icns')
+            for|icn| of=component.supportedICNS
+              $ let disabled = state.images[component.ICNToSizeMap[icn]] ? state.images[component.ICNToSizeMap[icn]].image === '' : true
+              label
+                input type='checkbox' checked=disabled?false:!state.inactiveICNS[icn] disabled=disabled on-change('setInactiveICNS', icn)
+                span -- ${icn}(${component.ICNToSizeMap[icn]})
+          else-if(state.activeExport === 'ico')
+            span -- ico opts
+          else-if(state.activeExport === 'png')
+            span -- png opts
           button on-click('export') -- export
