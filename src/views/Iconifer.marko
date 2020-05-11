@@ -1,5 +1,6 @@
 import { remote } from 'electron'
 import * as fs from 'fs'
+import * as path from 'path'
 import { encode as IcoEncode } from 'ico-endec'
 import { encode as IcnsEncode } from 'icns-endec'
 
@@ -11,6 +12,7 @@ class {
             activeExport: 'ico',
             inactiveICNS: {},
             inactiveICOs: {},
+            PNGPattern: 'myIcon-\${w}x\${h}.png',
             exports: {
                 'icns': {
                     /*
@@ -199,6 +201,9 @@ class {
       this.forceUpdate()
       this.update()
     }
+    changePNGPattern(e) {
+        this.state.PNGPattern = e.target.value
+    }
     getExportingIcons() {
       let icons = [...Object.entries(this.state.sets[this.state.activeSet]).reduce((o,v)=>{
         if (!v[1].active) return o
@@ -258,8 +263,43 @@ class {
       let outputBuffer = IcnsEncode(icons)
       await fs.promises.writeFile(r.filePath, outputBuffer, null)
     }
-    exportPNGs() {
-      // Export to the desired directory, formatting the files according to some sort of string-matching input.
+    async exportPNGs() {
+        let icons = this.getExportingIcons()
+        // Gather our desired icon file names
+        let iconFilenames = icons.map((icon, iconIndex) => {
+            let iconFilename = this.state.PNGPattern
+            let [w, h] = icon.split('x')
+            w = Number(w), h = Number(h)
+
+            return iconFilename.replace(/\${w}/g, w)
+                           .replace(/\${h}/g, h)
+                           .replace(/\${i}/g, icons.length - 1 - iconIndex)
+                           .replace(/\${i\+}/g, icons.length - 1 - iconIndex + 1)
+                           .replace(/\${I}/g, iconIndex)
+                           .replace(/\${I\+}/g, iconIndex + 1)
+                           .replace(/\${t}/g, icons.length)
+                           .replace(/\${t-}/g, icons.length-1)
+        })
+
+        for (let i = 0; i < icons.length; i++) {
+            icons[i] = Buffer.from(new Uint8Array(await this.state.images[icons[i]].blob.arrayBuffer()))
+        }
+
+        let r = await remote.dialog.showOpenDialog({
+            properties: ['openDirectory', 'createDirectory'],
+            title: 'Export PNGs to directory',
+        })
+        if (r.canceled) return
+
+        for (let i = 0; i < icons.length; i++) {
+            let outputPath = path.join(r.filePaths[0], iconFilenames[i])
+            // Ensure path to icon is created recursively in case the user uses directories in icon output.
+            await fs.promises.mkdir(path.parse(outputPath).dir, {
+                recursive: true,
+            })
+            // Write it!
+            await fs.promises.writeFile(outputPath, icons[i], null)
+        }
     }
 }
 
@@ -381,6 +421,28 @@ style {
         background: var(--quaternary);
         padding: .5em;
     }
+    .Exports__Info__ICNS {
+        display: inline-flex;
+    }
+    .Exports__Info__ICO {
+        display: inline-flex;
+    }
+    .Exports__Info__PNG {
+        display: inline-flex;
+        flex-direction: column;
+    }
+    .Exports__Info__PNG__pattern {
+    }
+    .Exports__Info__PNG__patterns {
+    }
+    .patternPair {
+        margin: 0 0.25em;
+    }
+    .patternPair > strong {
+    }
+    .patternPair > span {
+        margin-left: .5em;
+    }
 }
 
 div.Menu
@@ -416,22 +478,53 @@ div.Content
                 label.Exports__Entries__Item class={'-active': state.activeExport===exp[0]} on-click('activateExport', exp[0])
                     span -- ${exp[0]}
         div.Exports__Info
-          if(state.activeExport === 'icns')
-            for|icn| of=component.supportedICNS
-              $ let disabled = state.images[component.ICNToSizeMap[icn]] ? state.images[component.ICNToSizeMap[icn]].image === '' : true
-              label
-                input type='checkbox' checked=disabled?false:!state.inactiveICNS[icn] disabled=disabled on-change('setInactiveICNS', icn)
-                span -- ${component.ICNToSizeMap[icn]}(${icn})
-          else-if(state.activeExport === 'ico')
-            for|icon| of=icons.filter(icon => {
-              let [w, h] = icon.split('x')
-              w = Number(w), h = Number(h)
-              if (w <= 256 && h <= 256) return true
-            })
-              $ let disabled = state.images[icon] ? state.images[icon].image === '' : true
-              label
-                input type='checkbox' checked=disabled?false:!state.inactiveICOs[icon] disabled=disabled on-change('setInactiveICO', icon)
-                span -- ${icon}
-          else-if(state.activeExport === 'png')
-            span -- png opts
-          button on-click('exportIcon') -- export
+            if(state.activeExport === 'icns')
+                div.Exports__Info__ICNS
+                    for|icn| of=component.supportedICNS
+                        $ let disabled = state.images[component.ICNToSizeMap[icn]] ? state.images[component.ICNToSizeMap[icn]].image === '' : true
+                        label
+                            input type='checkbox' checked=disabled?false:!state.inactiveICNS[icn] disabled=disabled on-change('setInactiveICNS', icn)
+                            span -- ${component.ICNToSizeMap[icn]}(${icn})
+            else-if(state.activeExport === 'ico')
+                div.Exports__Info__ICO
+                    for|icon| of=icons.filter(icon => {
+                        let [w, h] = icon.split('x')
+                        w = Number(w), h = Number(h)
+                        if (w <= 256 && h <= 256) return true
+                    })
+                        $ let disabled = state.images[icon] ? state.images[icon].image === '' : true
+                        label
+                            input type='checkbox' checked=disabled?false:!state.inactiveICOs[icon] disabled=disabled on-change('setInactiveICO', icon)
+                            span -- ${icon}
+            else-if(state.activeExport === 'png')
+                div.Exports__Info__PNG
+                    label.Exports__Info__PNG__pattern
+                        span -- output pattern
+                        input placeholder='myIcon-\${w}x\${h}.png' value=state.PNGPattern on-change('changePNGPattern')
+                    div.Exports__Info__PNG__patterns
+                        label.patternPair
+                            strong -- \${w}
+                            span -- width
+                        label.patternPair
+                            strong -- \${h}
+                            span -- height
+                        label.patternPair
+                            strong -- \${i}
+                            span -- index (from zero)
+                        label.patternPair
+                            strong -- \${i+}
+                            span -- index (from one)
+                        label.patternPair
+                            strong -- \${I}
+                            span -- index (largest size, from zero)
+                        label.patternPair
+                            strong -- \${I+}
+                            span -- index (largest size, from one)
+                        label.patternPair
+                            strong -- \${t}
+                            span -- total
+                        label.patternPair
+                            strong -- \${t-}
+                            span -- total-1
+
+            button on-click('exportIcon') -- export
