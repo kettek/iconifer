@@ -420,6 +420,8 @@ style {
     .Exports__Info {
         background: var(--quaternary);
         padding: .5em;
+        display: flex;
+        justify-content: space-between;
     }
     .Exports__Info__ICNS {
         display: inline-flex;
@@ -434,14 +436,18 @@ style {
     .Exports__Info__PNG__pattern {
     }
     .Exports__Info__PNG__patterns {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        font-size: 75%;
     }
     .patternPair {
-        margin: 0 0.25em;
+        margin: .25em;
     }
     .patternPair > strong {
     }
     .patternPair > span {
-        margin-left: .5em;
     }
 }
 
@@ -504,27 +510,27 @@ div.Content
                     div.Exports__Info__PNG__patterns
                         label.patternPair
                             strong -- \${w}
-                            span -- width
+                            span -- ―width
                         label.patternPair
                             strong -- \${h}
-                            span -- height
+                            span -- ―height
                         label.patternPair
                             strong -- \${i}
-                            span -- index (from zero)
+                            span -- ―index (from zero)
                         label.patternPair
                             strong -- \${i+}
-                            span -- index (from one)
+                            span -- ―index (from one)
                         label.patternPair
                             strong -- \${I}
-                            span -- index (largest size, from zero)
+                            span -- ―index (largest size, from zero)
                         label.patternPair
                             strong -- \${I+}
-                            span -- index (largest size, from one)
+                            span -- ―index (largest size, from one)
                         label.patternPair
                             strong -- \${t}
-                            span -- total
+                            span -- ―total
                         label.patternPair
                             strong -- \${t-}
-                            span -- total-1
+                            span -- ―total-1
 
             button on-click('exportIcon') -- export
