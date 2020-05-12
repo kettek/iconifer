@@ -49,11 +49,12 @@ class {
 style {
     .Icon {
         position: relative;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
+        text-align: center;
+        padding: .5em;
     }
     .Icon__Image {
+        max-width: 100%;
+        max-height: 100%;
         background-image: /* tint image */
             linear-gradient(to right, rgba(192, 192, 192, 0.75), rgba(192, 192, 192, 0.75)),
             /* checkered effect */
@@ -68,7 +69,8 @@ style {
         font-weight: bold;
     }
 }
+
+$ let [w, h] = input.name.split('x')
 div.Icon draggable="true" on-dragover('handleDragover') on-drop('handleDrop') on-dragstart('handleDragstart') on-click('handleClick') on-contextmenu('handleRightClick')
-    $ let [w, h] = input.name.split('x')
-    img.Icon__Image key='image' draggable=false width=w height=h src=input.image
-    span.Icon__Name draggable=false -- ${input.name}
+    img.Icon__Image key='image' draggable=false src=input.image
+    div.Icon__Name draggable=false -- ${input.name}
